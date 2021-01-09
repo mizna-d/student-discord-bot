@@ -3,7 +3,7 @@ from discord.ext import commands
 
 from bot import helper
 
-checklist_file = r"C:\Users\Mixna\PycharmProjects\discordBotProject\Storage" \
+checklist_file = r"C:\Users\Mixna\PycharmProjects\student-discord-bot\Storage" \
                  r"\checklist.csv "
 
 

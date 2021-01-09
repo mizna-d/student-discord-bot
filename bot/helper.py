@@ -1,7 +1,9 @@
 import csv
 import datetime
+from discord.ext import commands
+import sqlite3
 
-question_bank_file = r'C:\Users\Mixna\PycharmProjects\discordBotProject' \
+question_bank_file = r'C:\Users\Mixna\PycharmProjects\student-discord-bot' \
                      r'\Storage\question_bank.csv '
 
 
@@ -50,7 +52,7 @@ def update_file(updated_content):
     :param updated_content:
     :return:
     """
-    if updated_content is not None and len(updated_content) != 0:
+    if updated_content is not None:
         with open(question_bank_file, "w", newline='') as file_to_update:
             file_to_update.truncate()
             writer = csv.writer(file_to_update)
@@ -149,3 +151,21 @@ def reminder_time(timing_content):
     total = days*24*60*60 + hours*60*60 + minutes*60
     return final_time.ctime(), days, hours, minutes, total
 
+
+def add_points(db, cursor, msg):
+
+    cursor.execute(f"SELECT user_id FROM user_levels WHERE "
+                   f"user_id = '{msg.author.id}'")
+    exists = cursor.fetchone()
+    if exists is None:
+        cursor.execute(f"INSERT INTO user_levels(user_id, XP, level) "
+                       f"VALUES({msg.author.id}, 1, 0)")
+        db.commit()
+    else:
+        cursor.execute(f"SELECT user_id, XP, level FROM user_levels WHERE "
+                       f"user_id = {msg.author.id}")
+        result = cursor.fetchone()
+        xp = int(result[1])
+        cursor.execute(f"UPDATE user_levels SET XP = {xp + 1} WHERE "
+                       f"user_id = {str(msg.author.id)}")
+        db.commit()

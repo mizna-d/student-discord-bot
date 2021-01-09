@@ -1,12 +1,13 @@
 import csv
 import re
 import random
+import sqlite3
 from discord.ext import commands
 
 from bot import helper
 
-f = r'C:\Users\Mixna\PycharmProjects\discordBotProject\Storage\question_bank' \
-    r'.csv '
+f = r'C:\Users\Mixna\PycharmProjects\student-discord-bot\Storage' \
+    r'\question_bank.csv '
 
 correct_feedback = ["That's right!", "Correct!", "That's correct!",
                     "You got it!", "Looks like you know your stuff!",
@@ -15,6 +16,9 @@ correct_feedback = ["That's right!", "Correct!", "That's correct!",
 incorrect_feedback = ["Oh no. Wrong answer.", "Ahh that's not correct.",
                       "Incorrect.", "Sorry, that's wrong.",
                       "Whoops! Wrong Answer.", "You might need more practice."]
+
+level_dict = {0: 0, 1: 5, 2: 10, 3: 25, 4: 45, 5: 70, 6: 100, 7: 150, 8: 200,
+              9: 350, 10: 500, 11: 1000000000000000}
 
 
 class QuizCog(commands.Cog):
@@ -191,14 +195,12 @@ class QuizCog(commands.Cog):
                                                     timeout=timeout * 1000)
                 if answer.content == chosen_row[1]:
 
-                    # TODO: randomize positive response // probably a helper
                     await ctx.send(random.choice(correct_feedback))
 
                 else:
                     incorrect = True
                     while incorrect:
 
-                        # TODO randomize here too
                         await ctx.send(random.choice(incorrect_feedback) +
                                        " Try again.\nIf you would like "
                                        "to exit, type '.exit'")
@@ -207,7 +209,6 @@ class QuizCog(commands.Cog):
                         if answer.content == chosen_row[1]:
                             incorrect = False
 
-                            # TODO randomize here too
                             await ctx.send(random.choice(correct_feedback))
                         elif answer.content == '.exit':
                             incorrect = False
@@ -255,14 +256,12 @@ class QuizCog(commands.Cog):
                                                     timeout=timeout * 1000)
                 if answer.content == chosen_row[1]:
 
-                    # TODO: randomize positive response // probably a helper
                     await ctx.send(random.choice(correct_feedback))
 
                 else:
                     incorrect = True
                     while incorrect:
 
-                        # TODO randomize here too
                         await ctx.send(random.choice(incorrect_feedback) +
                                        " Try again."
                                        "\nIf you would like "
@@ -273,7 +272,6 @@ class QuizCog(commands.Cog):
                         if answer.content == chosen_row[1]:
                             incorrect = False
 
-                            # TODO randomize here too
                             await ctx.send(random.choice(correct_feedback))
                         elif answer.content == '.exit':
                             incorrect = False
@@ -338,8 +336,33 @@ class QuizCog(commands.Cog):
                 if answer.content == chosen_row[1]:
                     correct += 1
 
-                    # TODO: randomize positive response // probably a helper
                     await ctx.send(random.choice(correct_feedback))
+
+                    db = sqlite3.connect('user_levels.sqlite')
+                    cursor = db.cursor()
+                    helper.add_points(db, cursor, answer)
+                    cursor.execute(f"SELECT user_id, XP, level FROM "
+                                   f"user_levels WHERE "
+                                   f"user_id = {answer.author.id}")
+                    user_stats = cursor.fetchone()
+                    current_xp = int(user_stats[1])
+                    current_level = int(user_stats[2])
+
+                    to_exceed = level_dict[current_level + 1]
+
+                    if current_xp >= to_exceed:
+                        await ctx.send(f"Congrats! {answer.author.mention} "
+                                       f"has leveled up "
+                                       f"to level {current_level + 1}! "
+                                       f"This means {answer.author.name} "
+                                       f"has answered {current_xp} questions "
+                                       f"correctly. Keep up the great work!")
+                        cursor.execute(f"UPDATE user_levels SET "
+                                       f"level = {current_level + 1} WHERE "
+                                       f"user_id = {str(answer.author.id)}")
+                        db.commit()
+                        cursor.close()
+                        db.close()
 
                 elif answer.content == '.exit':
                     await ctx.send(f"You have exited the question bank. "
@@ -347,7 +370,6 @@ class QuizCog(commands.Cog):
                                    f"{total}, {(correct / total) * 100}%.")
 
                 else:
-                    # TODO randomize here too
                     await ctx.send(random.choice(incorrect_feedback))
 
     @commands.command(case_insensitive=True,
@@ -401,8 +423,33 @@ class QuizCog(commands.Cog):
 
                 if answer.content == chosen_row[1]:
                     correct += 1
-                    # TODO: randomize positive response // probably a helper
                     await ctx.send(random.choice(correct_feedback))
+
+                    db = sqlite3.connect('user_levels.sqlite')
+                    cursor = db.cursor()
+                    helper.add_points(db, cursor, answer)
+                    cursor.execute(f"SELECT user_id, XP, level FROM "
+                                   f"user_levels WHERE "
+                                   f"user_id = {answer.guild.id}")
+                    user_stats = cursor.fetchone()
+                    current_xp = int(user_stats[1])
+                    current_level = int(user_stats[2])
+
+                    to_exceed = level_dict[current_level + 1]
+
+                    if current_xp >= to_exceed:
+                        await ctx.send(f"Congrats! {answer.author.mention}"
+                                       f" has leveled up "
+                                       f"to level {current_level + 1}! "
+                                       f"This means {answer.author.nickname} "
+                                       f"has answered {current_xp} questions "
+                                       f"correctly. Keep up the great work!")
+                        cursor.execute(f"UPDATE user_levels SET "
+                                       f"level = {current_level + 1} WHERE "
+                                       f"user_id = {str(answer.author.id)}")
+                        db.commit()
+                        cursor.close()
+                        db.close()
 
                 elif answer.content == '.exit':
                     await ctx.send(f"You have exited the question bank. "
@@ -411,7 +458,6 @@ class QuizCog(commands.Cog):
                     break
 
                 else:
-                    # TODO randomize here too
                     await ctx.send(random.choice(incorrect_feedback))
 
 
