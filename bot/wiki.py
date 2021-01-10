@@ -5,23 +5,31 @@ from discord.ext import commands
 
 def get_wiki_info(topic):
     """
-
-    :param topic:
-    :return:
+    Get a brief summary of the topic from wikipedia
+    :param topic: the requested topic from the user
+    :return: summary of the topic
     """
     return wikipedia.summary(topic, sentences=5)
 
 
 class WikiCog(commands.Cog):
+    """
+    This class is responsible for commands related to outputting wiki summaries of
+    topics aspect of the bot. This includes, recieving topics from the user and
+    displaying a brief summary from wikipedia about the users request. Users are
+    able to comprehend possible confusing topics while studying
+    """
+
     def __init__(self, client):
         self.client = client
 
     @commands.command(caseinsensitive=True, aliases=['wiki', 'wikipedia'])
     async def wikipedia_info(self, ctx):
         """
-
-        :param ctx:
-        :return:
+        Allows the user to request a topic and recieve a message from the bot
+        of a summary from wikipedia
+        :param ctx: the context of the command call
+        :returns: messages in response to to the user's request of a topic
         """
 
         # asks for the wikipedia topic

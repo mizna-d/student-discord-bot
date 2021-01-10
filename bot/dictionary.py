@@ -7,9 +7,9 @@ dictionary = PyDictionary()
 
 def get_definition(word):
     """
-
-    :param word:
-    :return:
+    Gets possible definitions of the word requested by the user and stores in a list
+    :param word: the word which was sent by the user
+    :returns: a list of possible definitions
     """
     word_meaning = PyDictionary(word)
     word_definitions = word_meaning.meaning(word)
@@ -26,6 +26,11 @@ def get_definition(word):
     return definition_list
 
 def display_definition(definition_list):
+    """
+    Displays all possible definitions for the word which was requested
+    :param definition_list: a list of possible definitions
+    :return: a formatted string of the definitions
+    """
     final_definitions = ""
     for i in definition_list:
         final_definitions += i + "\n" + "\n"
@@ -34,7 +39,10 @@ def display_definition(definition_list):
 
 class DictionaryCog(commands.Cog):
     """
-
+    This class is responsible for commands related to the finding the definitions
+    of words aspect of the bot. This includes, recieving words and outputting the
+    definition of the word. Users are able to acquire definitions for unknown words
+    while studying.
     """
     def __init__(self, client):
         self.client = client
@@ -42,9 +50,9 @@ class DictionaryCog(commands.Cog):
     @commands.command(caseinsensitive=True, aliases=['define', 'definition'])
     async def word_definition(self, ctx):
         """
-
-        :param ctx:
-        :return:
+        Allows the user to send a word to be defined and recieve a definition
+        :param ctx: the context of the command call
+        :returns: messages in response to to the user's decisions
         """
         await ctx.send('What word would you like the definition for?')
 
